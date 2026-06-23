@@ -1,9 +1,9 @@
-require("dotenv").config();
+require("dotenv").config({ override: true });
 
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY
+    apiKey: process.env.GEMINI_API_KEY.trim()
 });
 
 module.exports.executar = async (sock, msg, args) => {
@@ -19,6 +19,8 @@ module.exports.executar = async (sock, msg, args) => {
         }
 
         await sock.sendMessage(jid, { text: "🧠 Pensando..." });
+
+        const ai = criarAI();
 
         const resposta = await ai.models.generateContent({
             model: "gemini-2.5-flash",
