@@ -18,6 +18,8 @@ const arquivoBemVindo = "./database/bemvindo.json";
 const arquivoSaida = "./database/saida.json";
 const arquivoCmdAdm = "./database/cmdadm.json";
 const arquivoProtecao = "./database/protecao.json";
+const arquivoVelha = "./database/velha.json";
+const arquivoListaNegra = "./database/listanegra.json";
 
 function garantirDatabase() {
     if (!fs.existsSync("./database")) fs.mkdirSync("./database");
@@ -197,7 +199,159 @@ async function iniciarBot() {
                 }
             }
         }
+// 🎮 JOGO DA VELHA AUTOMÁTICO
+if (jid.endsWith("@g.us")) {
 
+    if (!fs.existsSync(arquivoVelha)) {
+        fs.writeFileSync(arquivoVelha, JSON.stringify({}, null, 2));
+    }
+
+    const velha = JSON.parse(
+        fs.readFileSync(arquivoVelha)
+    );
+
+    const jogo = velha[jid]?.jogo;
+
+    if (
+        jogo &&
+        /^[1-9]$/.test(texto.trim())
+    ) {
+
+        const user = msg.key.participant;
+
+        if (jogo.vez !== user) return;
+
+        const pos = Number(texto.trim()) - 1;
+
+        if (
+            jogo.tabuleiro[pos] === "❌" ||
+            jogo.tabuleiro[pos] === "⭕"
+        ) {
+
+            await sock.sendMessage(jid, {
+                text: "❌ Essa posição já foi usada."
+            });
+
+            return;
+        }
+
+        const simbolo =
+            user === jogo.jogadorX
+                ? "❌"
+                : "⭕";
+
+        jogo.tabuleiro[pos] = simbolo;
+
+        const linhas = [
+            [0,1,2],
+            [3,4,5],
+            [6,7,8],
+            [0,3,6],
+            [1,4,7],
+            [2,5,8],
+            [0,4,8],
+            [2,4,6]
+        ];
+
+        let vencedor = null;
+
+        for (const [a,b,c] of linhas) {
+            if (
+                jogo.tabuleiro[a] === jogo.tabuleiro[b] &&
+                jogo.tabuleiro[b] === jogo.tabuleiro[c]
+            ) {
+                vencedor = jogo.tabuleiro[a];
+            }
+        }
+
+        const cheio =
+            jogo.tabuleiro.every(
+                x => x === "❌" || x === "⭕"
+            );
+
+        function desenhar(tab) {
+            return `
+┌───┬───┬───┐
+│ ${tab[0]} │ ${tab[1]} │ ${tab[2]} │
+├───┼───┼───┤
+│ ${tab[3]} │ ${tab[4]} │ ${tab[5]} │
+├───┼───┼───┤
+│ ${tab[6]} │ ${tab[7]} │ ${tab[8]} │
+└───┴───┴───┘`;
+        }
+
+        if (vencedor) {
+
+            const ganhador =
+                vencedor === "❌"
+                    ? jogo.jogadorX
+                    : jogo.jogadorO;
+
+            delete velha[jid].jogo;
+
+            fs.writeFileSync(
+                arquivoVelha,
+                JSON.stringify(velha, null, 2)
+            );
+
+            await sock.sendMessage(jid, {
+                text:
+`🏆 VITÓRIA!
+
+${desenhar(jogo.tabuleiro)}
+
+Parabéns @${ganhador.split("@")[0]} 🎉`,
+                mentions: [ganhador]
+            });
+
+            return;
+        }
+
+        if (cheio) {
+
+            delete velha[jid].jogo;
+
+            fs.writeFileSync(
+                arquivoVelha,
+                JSON.stringify(velha, null, 2)
+            );
+
+            await sock.sendMessage(jid, {
+                text:
+`🤝 EMPATE!
+
+${desenhar(jogo.tabuleiro)}`
+            });
+
+            return;
+        }
+
+        jogo.vez =
+            user === jogo.jogadorX
+                ? jogo.jogadorO
+                : jogo.jogadorX;
+
+        fs.writeFileSync(
+            arquivoVelha,
+            JSON.stringify(velha, null, 2)
+        );
+
+        await sock.sendMessage(jid, {
+            text:
+`🎮 JOGO DA VELHA
+
+${desenhar(jogo.tabuleiro)}
+
+Vez de:
+@${jogo.vez.split("@")[0]}
+
+Escolha um número de 1 a 9.`,
+            mentions: [jogo.vez]
+        });
+
+        return;
+    }
+}
         if (!texto.startsWith(config.prefix)) return;
 
         const args = texto
@@ -253,6 +407,32 @@ async function iniciarBot() {
             const jid = update.id;
 
             if (update.action === "add") {
+                // 🚫 LISTA NEGRA AUTOMÁTICA
+const listaNegra = carregarJson(arquivoListaNegra);
+const listaGrupo = listaNegra[jid] || [];
+
+for (const participante of update.participants) {
+    const jidParticipante = pegarJidParticipante(participante);
+    const numero = limparNumero(jidParticipante);
+
+    const estaNaLista = listaGrupo.some(pessoa =>
+        limparNumero(pessoa) === numero
+    );
+
+    if (estaNaLista) {
+        await sock.groupParticipantsUpdate(jid, [jidParticipante], "remove");
+
+        await sock.sendMessage(jid, {
+            text:
+`🚫 *LISTA NEGRA DETECTADA!*
+
+@${numero} tentou entrar no grupo e foi removido automaticamente.`,
+            mentions: [jidParticipante]
+        });
+
+        return;
+    }
+}
                 const protecao = carregarJson(arquivoProtecao);
                 const configProtecao = protecao[jid];
 

@@ -1,86 +1,134 @@
 const fs = require("fs");
-
 const config = require("../config");
 
-module.exports.executar = async (sock, msg) => {
-
+module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
+    const categoria = args[0]?.toLowerCase();
 
-    const menu = `
-╭━━━〔 🌈 *${config.nomeBot}* 〕━━━╮
-┃ ✨ Seu bot favorito
+    const menus = {
+        principal:
+`╭━━━〔 🌙 *PHELIOSBOT* 〕━━━╮
+┃ 🤖 Versão: ${config.versao}
+┃ 🌈 Prefixo: ${config.prefix}
+┃ 👑 Dono: ${config.dono}
 ╰━━━━━━━━━━━━━━━━━━━━╯
 
-📚 *INFORMAÇÕES*
-┃ ℹ️ .info
-┃ 📜 .menu
-
-🖼️ *FIGURINHAS*
-┃ ✨ .s
-┃ ✨ .sticker
-
-🎵 *MÚSICA*
-┃ 🎧 .play
-
-👮 *ADMINISTRAÇÃO*
-┃ 🚫 .ban
-┃ 👑 .promote
-┃ 🧹 .demote
-┃ 🔇 .grupo f
-┃ 🔊 .grupo a
-┃ 🔒 .cmdadm on
-┃ 🔓 .cmdadm off
-
-🛡️ *PROTEÇÃO*
-┃ 🔗 .protecao antilink on/off
-┃ 👤 .protecao antifake on/off
-┃ 🔞 .protecao antiporn on/off
-
-🌈 *BEM-VINDO*
-┃ 💖 .bemvindo
-┃ 📝 .bemvindo msg
-┃ 🖼️ .bemvindo foto
-
-💔 *SAÍDA*
-┃ 💔 .saida
-┃ 📝 .saida msg
-┃ 🖼️ .saida foto
-
-💕 *RELACIONAMENTOS*
-┃ 💖 .namorar
-┃ 💍 .casar
-┃ ✅ .aceitar
-┃ ❌ .recusar
-┃ ❤️ .meuamor
-
-💋 *INTERAÇÕES*
-┃ 💋 .beijo
-┃ 🤗 .abraco
-┃ 🤝 .dedinho
-┃ 👅 .lamber
-┃ 🍑 .popo
-┃ 😈 .come
-┃ 👋 .tapa
-┃ 🪂 .penhasco
-
-🧹 *UTILIDADES*
-┃ 🗑️ .d
-┃ 🗑️ .delete
+📚 *.menu geral*
+👮 *.menu adm*
+🎮 *.menu jogos*
+💋 *.menu interacoes*
+⚔️ *.menu rpg*
 
 ╭━━━━━━━━━━━━━━━━━━━━╮
-┃ 👑 Dono: ${config.dono}
-┃ 📦 Versão: ${config.versao}
-┃ 🌈 Prefixo: ${config.prefix}
-╰━━━━━━━━━━━━━━━━━━━━╯
-`;
+┃ Digite uma categoria acima.
+╰━━━━━━━━━━━━━━━━━━━━╯`,
+
+        geral:
+`📚 *MENU GERAL*
+
+ℹ️ .info
+📜 .menu
+🎵 .play
+✨ .s
+✨ .sticker
+🏷️ .take
+📣 .marcar mensagem
+🗑️ .d
+🗑️ .delete
+🤖 .gemini pergunta`,
+
+        adm:
+`👮 *MENU ADMINISTRAÇÃO*
+
+🚫 .ban @pessoa
+👑 .promote @pessoa
+📉 .demote @pessoa
+🔒 .cmdadm on
+🔓 .cmdadm off
+
+🛡️ *PROTEÇÃO*
+🔗 .protecao antilink on/off
+👤 .protecao antifake on/off
+🔞 .protecao antiporn on/off
+
+🚫 .listanegra add @pessoa
+✅ .listanegra del @pessoa
+📋 .listanegra listar
+
+🌈 *ENTRADA/SAÍDA*
+💖 .bemvindo on/off
+📝 .bemvindo msg texto
+🖼️ .bemvindo foto
+
+💔 .saida on/off
+📝 .saida msg texto
+🖼️ .saida foto
+
+🔇 .grupo f
+🔊 .grupo a`,
+
+        jogos:
+`🎮 *MENU JOGOS*
+
+🎲 .ppp
+❌ .velha @pessoa
+✅ .aceitarvelha
+❌ .recusarvelha
+
+💕 *RELACIONAMENTOS*
+💘 .namorar @pessoa
+💍 .casar @pessoa
+✅ .aceitar
+❌ .recusar
+❤️ .meuamor`,
+
+        interacoes:
+`💋 *MENU INTERAÇÕES*
+
+💋 .beijo @pessoa
+🤗 .abraco @pessoa
+🤝 .dedinho @pessoa
+👅 .lamber @pessoa
+🍑 .popo @pessoa
+😈 .come @pessoa
+👋 .tapa @pessoa
+🪂 .penhasco @pessoa
+🍅 .tomate @pessoa
+🧽 .lavarlouca @pessoa
+
+📢 *STATUS*
+💤 .ausente motivo
+😂 .ativo`,
+
+        rpg:
+`⚔️ *MENU RPG*
+
+🎲 .d20
+🧙 .criarpersonagem classe
+👤 .perfil
+⚔️ .caçar
+🛌 .descansar
+🎒 .inventario
+📜 .missao
+✅ .concluir
+🏆 .rankrpg
+🏪 .loja
+💰 .comprar número
+
+🤖 *IA RPG*
+🧠 .rpg personagem descrição
+🗺️ .rpg mapa descrição
+📖 .rpg narrar ação
+🖼️ .rpgimagem personagem descrição`
+    };
+
+    const menu = menus[categoria] || menus.principal;
 
     if (fs.existsSync("./midia/menu.jpg")) {
-
-        return await sock.sendMessage(jid, {
+        return sock.sendMessage(jid, {
             image: fs.readFileSync("./midia/menu.jpg"),
             caption: menu
         });
-
     }
 
     await sock.sendMessage(jid, {

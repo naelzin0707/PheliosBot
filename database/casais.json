@@ -1,23 +1,33 @@
 {
   "120363424668518964@g.us": {
     "pendentes": {
-      "94081879420928@lid": {
-        "autor": "53674961285250@lid",
-        "alvo": "94081879420928@lid",
+      "97203783741504@lid": {
+        "autor": "67861221482521@lid",
+        "alvo": "97203783741504@lid",
         "tipo": "casamento",
-        "criadoEm": 1782134561528
+        "criadoEm": 1782172301325
       }
     },
     "casais": {
       "97203783741504@lid": {
         "parceiro": "269836252926128@lid",
         "tipo": "casamento",
-        "inicio": 1782140502558
+        "inicio": 1782172356235
       },
       "269836252926128@lid": {
         "parceiro": "97203783741504@lid",
         "tipo": "casamento",
-        "inicio": 1782140502558
+        "inicio": 1782172356235
+      },
+      "53674961285250@lid": {
+        "parceiro": "94081879420928@lid",
+        "tipo": "casamento",
+        "inicio": 1782143500714
+      },
+      "94081879420928@lid": {
+        "parceiro": "53674961285250@lid",
+        "tipo": "casamento",
+        "inicio": 1782143500714
       }
     }
   }

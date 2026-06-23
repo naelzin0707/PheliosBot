@@ -1,0 +1,15 @@
+{
+  "261289217663164@lid": {
+    "classe": "mago",
+    "nivel": 2,
+    "xp": 0,
+    "ouro": 125,
+    "vida": 90,
+    "vidaMax": 90,
+    "ataque": 8,
+    "defesa": 6,
+    "magia": 19,
+    "inventario": [],
+    "missao": null
+  }
+}
