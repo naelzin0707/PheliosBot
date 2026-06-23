@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const { execFile } = require("child_process");
 const yts = require("yt-search");
-const ffmpegPath = require("ffmpeg-static");
 
 module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
@@ -29,7 +28,9 @@ module.exports.executar = async (sock, msg, args) => {
             });
         }
 
-        if (!fs.existsSync("./temp")) fs.mkdirSync("./temp");
+        if (!fs.existsSync("./temp")) {
+            fs.mkdirSync("./temp");
+        }
 
         const id = Date.now();
         const saidaBase = path.join("./temp", `${id}.%(ext)s`);
@@ -45,18 +46,21 @@ module.exports.executar = async (sock, msg, args) => {
         });
 
         await new Promise((resolve, reject) => {
-            execFile("py", [
-                "-m", "yt_dlp",
+
+            execFile("yt-dlp", [
                 video.url,
                 "-x",
                 "--audio-format", "mp3",
-                "--ffmpeg-location", ffmpegPath,
+                "--ffmpeg-location", "ffmpeg",
                 "-o", saidaBase,
                 "--no-playlist"
             ], (error) => {
+
                 if (error) reject(error);
                 else resolve();
+
             });
+
         });
 
         if (!fs.existsSync(saidaFinal)) {
@@ -72,10 +76,12 @@ module.exports.executar = async (sock, msg, args) => {
         fs.unlinkSync(saidaFinal);
 
     } catch (erro) {
+
         console.error("ERRO PLAY:", erro);
 
         await sock.sendMessage(jid, {
             text: "❌ Deu erro no .play. Veja o terminal."
         });
+
     }
 };

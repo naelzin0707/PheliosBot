@@ -1,6 +1,6 @@
 const ffmpeg = require("fluent-ffmpeg");
 
-ffmpeg.setFfmpegPath("ffmpeg");
+ffmpeg.set("ffmpeg");
 
 async function converterImagemParaWebp(entrada, saida) {
     await sharp(entrada)

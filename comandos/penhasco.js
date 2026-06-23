@@ -1,9 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
-const ffmpegPath = require("ffmpeg-static");
 
-ffmpeg.setFfmpegPath(ffmpegPath);
+
+ffmpeg.set("ffmpeg");
 
 function converterGifParaMp4(entrada, saida) {
     return new Promise((resolve, reject) => {
