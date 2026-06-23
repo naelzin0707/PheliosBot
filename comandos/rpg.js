@@ -2,9 +2,11 @@ require("dotenv").config({ override: true });
 
 const { GoogleGenAI } = require("@google/genai");
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY.trim()
-});
+function criarAI() {
+    return new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY.trim()
+    });
+}
 
 module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
@@ -100,6 +102,7 @@ Formato:
 
     } catch (erro) {
         console.error("ERRO RPG:", erro);
+
         await sock.sendMessage(jid, {
             text: "❌ Deu erro no .rpg. Veja o terminal."
         });

@@ -2,9 +2,11 @@ require("dotenv").config({ override: true });
 
 const { GoogleGenAI } = require("@google/genai");
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY.trim()
-});
+function criarAI() {
+    return new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY.trim()
+    });
+}
 
 module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
@@ -33,6 +35,7 @@ module.exports.executar = async (sock, msg, args) => {
 
     } catch (erro) {
         console.error("ERRO GEMINI:", erro);
+
         await sock.sendMessage(jid, {
             text: "❌ Deu erro no Gemini. Veja o terminal."
         });
