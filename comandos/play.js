@@ -7,7 +7,7 @@ module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
 
     try {
-        const pesquisa = args.join(" ");
+        const pesquisa = args.join(" ").trim();
 
         if (!pesquisa) {
             return sock.sendMessage(jid, {
@@ -46,7 +46,6 @@ module.exports.executar = async (sock, msg, args) => {
         });
 
         await new Promise((resolve, reject) => {
-
             execFile("yt-dlp", [
                 video.url,
                 "-x",
@@ -55,12 +54,9 @@ module.exports.executar = async (sock, msg, args) => {
                 "-o", saidaBase,
                 "--no-playlist"
             ], (error) => {
-
                 if (error) reject(error);
                 else resolve();
-
             });
-
         });
 
         if (!fs.existsSync(saidaFinal)) {
@@ -70,18 +66,16 @@ module.exports.executar = async (sock, msg, args) => {
         await sock.sendMessage(jid, {
             audio: fs.readFileSync(saidaFinal),
             mimetype: "audio/mpeg",
-            fileName: `${video.title}.mp3`
+            fileName: `${video.title}.mp3"
         });
 
         fs.unlinkSync(saidaFinal);
 
     } catch (erro) {
-
         console.error("ERRO PLAY:", erro);
 
         await sock.sendMessage(jid, {
             text: "❌ Deu erro no .play. Veja o terminal."
         });
-
     }
 };
