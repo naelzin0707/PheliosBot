@@ -66,7 +66,7 @@ module.exports.executar = async (sock, msg, args) => {
         await sock.sendMessage(jid, {
             audio: fs.readFileSync(saidaFinal),
             mimetype: "audio/mpeg",
-            fileName: `${video.title}.mp3"
+            fileName: `${video.title}.mp3`
         });
 
         fs.unlinkSync(saidaFinal);
