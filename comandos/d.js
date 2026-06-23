@@ -10,18 +10,29 @@ module.exports.executar = async (sock, msg) => {
     try {
         const ctx = msg.message?.extendedTextMessage?.contextInfo;
 
-        if (!ctx?.stanzaId || !ctx?.participant) {
+        if (!ctx?.stanzaId) {
             return sock.sendMessage(jid, {
                 text: "❌ Responda a mensagem que você quer apagar com *.d*"
             });
         }
+
+        const participante =
+            ctx.participant ||
+            ctx.remoteJid ||
+            msg.key.participant;
+
+        console.log("🗑️ DELETE:", {
+            jid,
+            stanzaId: ctx.stanzaId,
+            participante
+        });
 
         await sock.sendMessage(jid, {
             delete: {
                 remoteJid: jid,
                 fromMe: false,
                 id: ctx.stanzaId,
-                participant: ctx.participant
+                participant: participante
             }
         });
 
@@ -33,7 +44,7 @@ module.exports.executar = async (sock, msg) => {
         console.error("ERRO DELETE:", erro);
 
         await sock.sendMessage(jid, {
-            text: "❌ Não consegui apagar. Eu preciso ser admin."
+            text: "❌ Não consegui apagar. Eu preciso ser admin e a mensagem precisa ser recente."
         });
     }
 };
