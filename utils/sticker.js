@@ -1,8 +1,6 @@
-const sharp = require("sharp");
 const ffmpeg = require("fluent-ffmpeg");
-const ffmpegPath = require("ffmpeg-static");
 
-ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfmpegPath("ffmpeg");
 
 async function converterImagemParaWebp(entrada, saida) {
     await sharp(entrada)
