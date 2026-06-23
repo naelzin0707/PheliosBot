@@ -3,6 +3,8 @@ const path = require("path");
 const { execFile } = require("child_process");
 const yts = require("yt-search");
 
+const FFMPEG_DIR = "/data/data/com.termux/files/usr/bin";
+
 module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
 
@@ -50,7 +52,7 @@ module.exports.executar = async (sock, msg, args) => {
                 video.url,
                 "-x",
                 "--audio-format", "mp3",
-                "--ffmpeg-location", "ffmpeg",
+                "--ffmpeg-location", FFMPEG_DIR,
                 "-o", saidaBase,
                 "--no-playlist"
             ], (error) => {
