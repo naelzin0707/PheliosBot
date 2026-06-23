@@ -3,7 +3,7 @@ const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
 
 
-ffmpeg.set("ffmpeg");
+ffmpeg.setFfmpegPath("ffmpeg");
 
 function converterGifParaMp4(entrada, saida) {
     return new Promise((resolve, reject) => {
