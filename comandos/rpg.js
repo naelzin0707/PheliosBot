@@ -1,10 +1,6 @@
 require("dotenv").config();
 
-const { GoogleGenAI } = require("@google/genai");
-
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY
-});
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports.executar = async (sock, msg, args) => {
     const jid = msg.key.remoteJid;
@@ -13,10 +9,16 @@ module.exports.executar = async (sock, msg, args) => {
         const tipo = args[0]?.toLowerCase();
         const descricao = args.slice(1).join(" ").trim();
 
+        if (!process.env.GEMINI_API_KEY) {
+            return sock.sendMessage(jid, {
+                text: "❌ GEMINI_API_KEY não encontrada no .env."
+            });
+        }
+
         if (!tipo) {
             return sock.sendMessage(jid, {
                 text:
-`🎲 *RPG PheliosBot*
+`🎲 *RPG IA*
 
 Use:
 
@@ -26,14 +28,20 @@ Use:
             });
         }
 
+        if (!["personagem", "mapa", "narrar"].includes(tipo)) {
+            return sock.sendMessage(jid, {
+                text: "❌ Tipo inválido.\n\nUse: personagem, mapa ou narrar."
+            });
+        }
+
         if (!descricao) {
             return sock.sendMessage(jid, {
-                text: "❌ Escreva uma descrição.\n\nExemplo:\n.rpg personagem mago lunar misterioso"
+                text: `❌ Escreva uma descrição.\n\nExemplo:\n.rpg ${tipo} descrição aqui`
             });
         }
 
         await sock.sendMessage(jid, {
-            text: "🎲 Criando conteúdo de RPG..."
+            text: "🎲 Gerando RPG com IA..."
         });
 
         let prompt = "";
@@ -42,7 +50,7 @@ Use:
             prompt =
 `Crie uma ficha curta de personagem de RPG em português brasileiro.
 
-Descrição base:
+Descrição:
 ${descricao}
 
 Formato:
@@ -56,14 +64,14 @@ Formato:
 🗡️ Ataque:
 🛡️ Defesa:
 🔮 Magia:
-🌙 Habilidade especial:
+🌙 Habilidade especial:`;
+        }
 
-Tom: criativo, dramático, mágico e estiloso.`;
-        } else if (tipo === "mapa") {
+        if (tipo === "mapa") {
             prompt =
-`Crie um local/mapa de RPG em português brasileiro.
+`Crie um mapa/local de RPG em português brasileiro.
 
-Descrição base:
+Descrição:
 ${descricao}
 
 Formato:
@@ -73,36 +81,34 @@ Formato:
 👹 Perigos:
 🎁 Tesouros:
 🧩 Segredo escondido:
-🎲 Gancho de aventura:
+🎲 Gancho de aventura:`;
+        }
 
-Tom: fantasia, mistério e aventura.`;
-        } else if (tipo === "narrar") {
+        if (tipo === "narrar") {
             prompt =
 `Narre uma cena curta de RPG em português brasileiro.
 
-Ação do jogador:
+Ação:
 ${descricao}
 
 Formato:
 📖 Cena:
 🎲 Consequência:
 ⚠️ Perigo:
-👉 Próxima escolha:
-
-Tom: narrador mestre de RPG, envolvente e cinematográfico.`;
-        } else {
-            return sock.sendMessage(jid, {
-                text: "❌ Tipo inválido.\n\nUse: personagem, mapa ou narrar."
-            });
+👉 Próxima escolha:`;
         }
 
-        const resposta = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash"
         });
 
+        const result = await model.generateContent(prompt);
+        const texto = result.response.text();
+
         await sock.sendMessage(jid, {
-            text: resposta.text || "❌ Não consegui criar o RPG."
+            text: texto || "❌ Não consegui gerar o RPG."
         });
 
     } catch (erro) {
